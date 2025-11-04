@@ -31,8 +31,25 @@ namespace ST7789 {
         auto set_memory_access_control() -> void;
         auto turn_on_display() -> void;
     public:
-        explicit ST7789(SPI_HandleTypeDef* spi_handle)
-          : spi(spi_handle) {}
+        explicit ST7789(
+            SPI_HandleTypeDef* spi_handle, 
+        
+            GPIO_TypeDef* reset_port, 
+            uint16_t reset_pin,
+        
+            GPIO_TypeDef* dc_port, 
+            uint16_t dc_pin,
+
+            GPIO_TypeDef* cs_port,
+            uint16_t cs_pin
+        )
+          : spi(spi_handle),
+          reset_port(reset_port),
+          reset_pin(reset_pin),
+          dc_port(dc_port),
+          dc_pin(dc_pin),
+          cs_port(cs_port),
+          cs_pin(cs_pin) {}
         auto init() -> void;
         auto display_image() -> void;
     };
