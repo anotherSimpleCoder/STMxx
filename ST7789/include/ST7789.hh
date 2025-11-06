@@ -11,7 +11,6 @@ namespace ST7789 {
     class ST7789 {
         static constexpr uint32_t width = 240;
         static constexpr uint32_t height = 320;
-        uint8_t buffer[width][height][3];
 
         SPI spi;
 
@@ -51,7 +50,7 @@ namespace ST7789 {
           cs_port(cs_port),
           cs_pin(cs_pin) {}
         auto init() -> void;
-        auto display_image() -> void;
+        auto display_image(uint8_t buffer[width][height][3]) -> void;
     };
 }
 #endif //ST7789_HH
