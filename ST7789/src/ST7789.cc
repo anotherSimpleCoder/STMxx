@@ -43,6 +43,12 @@ namespace ST7789 {
         HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_SET);
     }
 
+    auto ST7789::delay_us(uint32_t delay) -> void {
+        __HAL_TIM_SET_COUNTER(timer_handle, delay);
+        while (__HAL_TIM_GET_COUNTER(timer_handle) > 0) {}
+    }
+
+
     auto ST7789::init_pins() -> void {
       HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_SET);
     }
