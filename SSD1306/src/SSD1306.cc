@@ -17,7 +17,7 @@ namespace SSD1306 {
     bool SSD1306::init() {
         i2c.init();
 
-        if (HAL_I2C_IsDeviceReady(i2c.get_i2c_handle(), i2c.address, 1, i2c.address)) {
+        if (HAL_I2C_IsDeviceReady(i2c.get_i2c_handle(), i2c.address, 1, i2c.timeout) != HAL_OK) {
             return false;
         }
 
@@ -28,34 +28,35 @@ namespace SSD1306 {
 
         /* Init LCD */
         write_command(DISPLAY_OFF);                // display off
-        write_command(SET_MEMORY_ADDRESSING_MODE); // Set Memory Addressing Mode
-        write_command(MEMORY_ADDRESSING_ARG);      // 00: Horizontal, 01: Vertical, 10: Page (RESET)
-        write_command(SET_PAGE_START_ADDR);        // Set Page Start Address for Page Addressing Mode,0-7
-        write_command(SET_COM_OUTPUT_SCAN_DIR);    // Set COM Output Scan Direction
-        write_command(SET_LOW_COLUMN_ADDR);        // set low column address
-        write_command(SET_HIGH_COLUMN_ADDR);       // set high column address
-        write_command(SET_START_LINE_ADDR);        // set start line address
-        write_command(SET_CONTRAST);               // set contrast control register
-        write_command(CONTRAST_MAX);
-        write_command(SET_SEGMENT_REMAP);          // set segment re-map 0 to 127
-        write_command(SET_NORMAL_DISPLAY);         // set normal display
-        write_command(SET_MULTIPLEX_RATIO);        // set multiplex ratio(1 to 64)
-        write_command(MULTIPLEX_RATIO_63);
-        write_command(OUTPUT_FOLLOWS_RAM);         // Output follows RAM content
-        write_command(SET_DISPLAY_OFFSET);         // set display offset
-        write_command(DISPLAY_OFFSET_0);           // no offset
-        write_command(SET_DISPLAY_CLK_DIV);        // set display clock divide ratio/oscillator frequency
-        write_command(DISPLAY_CLK_DIV_F0);         // set divide ratio
-        write_command(SET_PRECHARGE_PERIOD);       // set pre-charge period
-        write_command(PRECHARGE_22);
-        write_command(SET_COM_PINS_HW_CONFIG);     // set com pins hardware configuration
-        write_command(COM_PINS_CFG_12);
-        write_command(SET_VCOMH);                  // set vcomh
-        write_command(VCOMH_77PCT_VCC);            // 0x20 -> ~0.77 x Vcc
-        write_command(SET_CHARGE_PUMP);            // set DC-DC enable
-        write_command(CHARGE_PUMP_ENABLE);
-        write_command(DISPLAY_ON);                 // turn on SSD1306
-        write_command(DEACTIVATE_SCROLL);
+		write_command(SET_MEMORY_ADDRESSING_MODE); // Set Memory Addressing Mode
+		write_command(MEMORY_ADDRESSING_ARG);      // 00: Horizontal, 01: Vertical, 10: Page (RESET)
+		write_command(SET_PAGE_START_ADDR);        // Set Page Start Address for Page Addressing Mode,0-7
+		write_command(SET_COM_OUTPUT_SCAN_DIR);    // Set COM Output Scan Direction
+		write_command(SET_LOW_COLUMN_ADDR);        // set low column address
+		write_command(SET_HIGH_COLUMN_ADDR);       // set high column address
+		write_command(SET_START_LINE_ADDR);        // set start line address
+		write_command(SET_CONTRAST);               // set contrast control register
+		write_command(CONTRAST_MAX);
+		write_command(SET_SEGMENT_REMAP);          // set segment re-map 0 to 127
+		write_command(SET_NORMAL_DISPLAY);         // set normal display
+		write_command(SET_MULTIPLEX_RATIO);        // set multiplex ratio(1 to 64)
+		write_command(static_cast<uint8_t>(height - 1)); //
+		write_command(OUTPUT_FOLLOWS_RAM);         // Output follows RAM content
+		write_command(SET_DISPLAY_OFFSET);         // set display offset
+		write_command(DISPLAY_OFFSET_0);           // no offset
+		write_command(SET_DISPLAY_CLK_DIV);        // set display clock divide ratio/oscillator frequency
+		write_command(DISPLAY_CLK_DIV_F0);         // set divide ratio
+		write_command(SET_PRECHARGE_PERIOD);       // set pre-charge period
+		write_command(PRECHARGE_22);
+		write_command(SET_COM_PINS_HW_CONFIG);     // set com pins hardware configuration
+		write_command(COM_PINS_CFG_12);
+		write_command(SET_VCOMH);                  // set vcomh
+		write_command(VCOMH_77PCT_VCC);            // 0x20 -> ~0.77 x Vcc
+		write_command(SET_CHARGE_PUMP);            // set DC-DC enable
+		write_command(CHARGE_PUMP_ENABLE);
+		write_command(DISPLAY_ON);                 // turn on SSD1306
+		write_command(DEACTIVATE_SCROLL);
+
 
         if(HAL_I2C_IsDeviceReady(i2c.get_i2c_handle(), i2c.address, 1, i2c.timeout) != HAL_OK) {
             return false;
@@ -80,7 +81,8 @@ namespace SSD1306 {
     }
 
     void SSD1306::update_screen() {
-        for (uint8_t m = 0; m < 8; m++) {
+    	const uint8_t pages = static_cast<uint8_t>(height / 8);
+        for (uint8_t m = 0; m < pages; m++) {
             write_command(0xB0 + m);
             write_command(0x00);
             write_command(0x10);
@@ -121,7 +123,7 @@ namespace SSD1306 {
         current_y = y;
     }
 
-    char SSD1306::putc(char ch, const Fonts::FontDef_t* Font, const Color color) {
+    char SSD1306::putc(char ch, Fonts::FontDef_t* Font, const Color color) {
         /* Check available space in LCD */
         if (
             width <= (current_x + Font->FontWidth) ||
@@ -138,7 +140,7 @@ namespace SSD1306 {
                 if ((b << j) & 0x8000) {
                     draw_pixel(current_x + j, (current_y + i), color);
                 } else {
-                    draw_pixel(current_y + j, (current_y + i), static_cast<Color>(!color));
+                    draw_pixel(current_x + j, (current_y + i), static_cast<Color>(!color));
                 }
             }
         }
@@ -150,7 +152,7 @@ namespace SSD1306 {
         return ch;
     }
 
-    char SSD1306::puts(const char* str, const Fonts::FontDef_t* Font, const Color color) {
+    char SSD1306::puts(const char* str, Fonts::FontDef_t* Font, const Color color) {
         /* Write characters */
         while (*str) {
             /* Write character by character */

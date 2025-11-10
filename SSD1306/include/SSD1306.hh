@@ -14,16 +14,14 @@ namespace SSD1306 {
 
     class SSD1306 {
     	static constexpr uint32_t width = 128;
-    	static constexpr uint32_t height = 64;
+    	static constexpr uint32_t height = 32;
 		I2C i2c;
     	uint8_t buffer[width * height / 8] = {};
-
 
         uint16_t current_x;
         uint16_t current_y;
         bool inverted;
         bool initialized;
-
     public:
     	SSD1306(I2C_HandleTypeDef* i2c_handle);
     	bool init();
@@ -36,8 +34,8 @@ namespace SSD1306 {
 		void clear();
     	void invert_display(bool invert) const;
     	void goto_xy(uint16_t x, uint16_t y);
-    	char putc(char ch, const Fonts::FontDef_t* Font, Color color);
-    	char puts(const char* str, const Fonts::FontDef_t* Font, Color color);
+    	char putc(char ch, Fonts::FontDef_t* Font, Color color);
+    	char puts(const char* str, Fonts::FontDef_t* Font, Color color);
     	void draw_pixel(uint16_t x, uint16_t y, Color color);
     	void draw_line(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, Color c);
     	void draw_rectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, Color c);
