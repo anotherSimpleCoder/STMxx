@@ -14,7 +14,7 @@ namespace ST7789 {
         turn_on_display();
     }
 
-    auto ST7789::render() -> void {
+    auto ST7789::render_image(const uint8_t* image) -> void {
         uint8_t column_addresses[4] = {0, 0, (((width -1) >> 8) & 0xff), ((width-1) & 0xff)};
         uint8_t row_addresses[4] = {0, 0, (((height -1) >> 8) & 0xff), ((height-1) & 0xff)};
 
@@ -36,7 +36,7 @@ namespace ST7789 {
 
         for(uint32_t y = 0; y < height; y++) {
           for(uint32_t x = 0; x < width; x++) {
-            spi.write_multi(buffer, 3);
+            spi.write_multi(image+(width * x + y), 3);
           }
         }
 
@@ -112,4 +112,3 @@ namespace ST7789 {
         HAL_GPIO_WritePin(dc_port, dc_pin, GPIO_PIN_SET);
     }
 };
-
